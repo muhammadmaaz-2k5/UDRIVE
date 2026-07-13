@@ -4,9 +4,12 @@ const mongoose = require('mongoose');
 const ConnectDB = require('./db/db');
 ConnectDB();
 const app = express();
+const userRoutes = require('./routes/user.route');
 
 app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(cors("*"));
+
 
 app.get('/api/health', async (req, res) => {
     try {
@@ -28,8 +31,13 @@ app.get('/api/health', async (req, res) => {
 });
 
 
+
+
 app.get('/', (req, res) => {
     res.send('Uber Backend API is running!');
 });
+
+app.use("/api/users", userRoutes);
+
 
 module.exports = app;
