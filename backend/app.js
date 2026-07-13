@@ -6,6 +6,7 @@ const ConnectDB = require('./db/db');
 ConnectDB();
 const app = express();
 const userRoutes = require('./routes/user.route');
+const driverRoutes = require('./routes/driver.route');
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
@@ -40,6 +41,7 @@ app.get('/', (req, res) => {
 });
 
 app.use("/api/users", userRoutes);
+app.use("/api/drivers", driverRoutes);
 
 
 module.exports = app;
