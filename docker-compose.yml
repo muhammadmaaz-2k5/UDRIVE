@@ -36,15 +36,16 @@ services:
   frontend:
     build:
       context: ./frontend
-      target: production
+      target: development
     container_name: uber-frontend
     restart: always
     ports:
-      - "8080:80"
+      - "5173:5173"
     depends_on:
       - backend
     volumes:
-      - ./frontend/index.html:/usr/share/nginx/html/index.html
+      - ./frontend:/app
+      - /app/node_modules
 
 volumes:
   mongo-data:
