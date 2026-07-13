@@ -15,6 +15,15 @@ class User extends Model {
     static async hashPassword(password) {
         return await bcrypt.hash(password, 10);
     }
+
+    toJSON() {
+        const values = { ...this.get() };
+        values.fullname = {
+            firstname: this.firstname,
+            lastname: this.lastname
+        };
+        return values;
+    }
 }
 
 User.init({

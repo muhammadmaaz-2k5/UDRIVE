@@ -15,6 +15,25 @@ class Driver extends Model {
     static async hashPassword(password) {
         return await bcrypt.hash(password, 10);
     }
+
+    toJSON() {
+        const values = { ...this.get() };
+        values.fullName = {
+            firstName: this.firstname,
+            lastName: this.lastname
+        };
+        values.location = {
+            lat: this.lat,
+            long: this.long
+        };
+        values.vehicleType = {
+            color: this.vehicleColor,
+            plate: this.vehiclePlate,
+            capacity: this.vehicleCapacity,
+            vehicleType: this.vehicleTypeName
+        };
+        return values;
+    }
 }
 
 Driver.init({
