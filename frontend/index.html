@@ -305,14 +305,14 @@
         <ul class="metrics-list">
           <li>
             <span class="metric-label">Engine</span>
-            <span class="metric-value">PostgreSQL 16</span>
+            <span class="metric-value">MongoDB</span>
           </li>
           <li>
             <span class="metric-label">Volume mount</span>
-            <span class="metric-value" style="color: var(--accent-color)">db-data</span>
+            <span class="metric-value" style="color: var(--accent-color)">mongo-data</span>
           </li>
           <li>
-            <span class="metric-label">Server Time</span>
+            <span class="metric-label">Connection</span>
             <span class="metric-value" id="db-time">-</span>
           </li>
         </ul>
@@ -364,7 +364,7 @@
           // DB online
           dbDot.className = 'dot online';
           dbStatusText.textContent = 'Online';
-          dbTime.textContent = new Date(data.databaseTime).toLocaleTimeString();
+          dbTime.textContent = data.database === 'connected' ? 'Connected' : 'Disconnected';
         } else {
           throw new Error(data.dbError || 'Database connection issue');
         }

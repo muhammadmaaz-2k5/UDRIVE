@@ -1,20 +1,22 @@
 const express = require('express');
 const cors = require('cors');
-const pool = require('./db/db');
+const mongoose = require('mongoose');
+const ConnectDB = require('./db/db');
+ConnectDB();
 const app = express();
 
-
 app.use(express.json());
-
-// Enable CORS for all requests so the frontend container can query this API
 app.use(cors("*"));
 
 app.get('/api/health', async (req, res) => {
     try {
-        const dbResult = await pool.query('SELECT NOW()');
+        const isConnected = mongoose.connection.readyState === 1;
+        if (!isConnected) {
+            throw new Error('Database is not connected');
+        }
         res.json({
             status: 'healthy',
-            databaseTime: dbResult.rows[0].now,
+            database: 'connected',
             environment: process.env.NODE_ENV
         });
     } catch (err) {
@@ -24,6 +26,7 @@ app.get('/api/health', async (req, res) => {
         });
     }
 });
+
 
 app.get('/', (req, res) => {
     res.send('Uber Backend API is running!');
