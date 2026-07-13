@@ -42,7 +42,7 @@ module.exports.loginDriver = async (req, res, next) => {
     const { email, password } = req.body;
 
     try {
-        const driver = await Driver.findOne({ email }).select('+password');
+        const driver = await Driver.findOne({ where: { email } });
 
         if (!driver) {
             return res.status(401).json({ message: 'Invalid email or password' });

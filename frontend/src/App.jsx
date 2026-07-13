@@ -5,6 +5,10 @@ import UserLogin from './pages/UserLogin'
 import UserSignUp from './pages/UserSignup'
 import DriverLogin from './pages/Driverlogin'
 import DriverSignUp from './pages/DriverSignup'
+import UserHome from './pages/UserHome'
+import DriverHome from './pages/DriverHome'
+import UserProtectWrapper from './components/UserProtectWrapper'
+import DriverProtectWrapper from './components/DriverProtectWrapper'
 
 const App = () => {
   return (
@@ -15,6 +19,18 @@ const App = () => {
         <Route path="/user/signup" element={<UserSignUp />} />
         <Route path="/driver/login" element={<DriverLogin />} />
         <Route path="/driver/signup" element={<DriverSignUp />} />
+
+        <Route path="/user-home" element={
+          <UserProtectWrapper>
+            <UserHome />
+          </UserProtectWrapper>
+        } />
+
+        <Route path="/driver-home" element={
+          <DriverProtectWrapper>
+            <DriverHome />
+          </DriverProtectWrapper>
+        } />
       </Routes>
     </div>
   );

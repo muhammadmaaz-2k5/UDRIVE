@@ -14,18 +14,14 @@ module.exports.createDriver = async ({
         throw new Error("All fields are required");
     }
     const driver = await Driver.create({
-        fullName: {
-            firstName: firstname,
-            lastName: lastname
-        },
+        firstname,
+        lastname,
         email,
         password,
-        vehicleType: {
-            color,
-            plate,
-            capacity,
-            vehicleType
-        }
+        vehicleColor: color,
+        vehiclePlate: plate,
+        vehicleCapacity: capacity,
+        vehicleTypeName: vehicleType
     });
     return driver;
 }

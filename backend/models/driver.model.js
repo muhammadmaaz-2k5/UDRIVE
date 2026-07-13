@@ -1,82 +1,105 @@
-const mongoose = require('mongoose');
-const jwt = require('jsonwebtoken');
+const { Model, DataTypes } = require('sequelize');
+const { sequelize } = require('../db/db');
 const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
 
-const driverSchema = new mongoose.Schema({
-    fullName: {
-        firstName: {
-            type: String,
-            required: true
-        },
-        lastName: {
-            type: String,
-            required: true
-        }
+class Driver extends Model {
+    async comparePassword(password) {
+        return await bcrypt.compare(password, this.password);
+    }
 
+    generateAuthToken() {
+        return jwt.sign({ _id: this.id }, process.env.JWT_SECRET, { expiresIn: '1d' });
+    }
+
+    static async hashPassword(password) {
+        return await bcrypt.hash(password, 10);
+    }
+}
+
+Driver.init({
+    firstname: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    lastname: {
+        type: DataTypes.STRING,
+        allowNull: false
     },
     email: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
         unique: true,
-        lowercase: true,
-        match: [/^\S+@\S+\.\S+$/, 'Please use a valid email address']
+        validate: {
+            isEmail: true
+        }
     },
     password: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false
     },
     socketId: {
-        type: String,
+        type: DataTypes.STRING
     },
     status: {
-        type: String,
-        enum: ['online', 'offline'],
-        default: 'offline'
+        type: DataTypes.ENUM('online', 'offline'),
+        defaultValue: 'offline'
     },
-    vehicleType: {
-        color: {
-            type: String,
-            required: true,
-            minLength: [2, 'Color must be at least 2 characters long'],
-        },
-        plate: {
-            type: String,
-            required: true,
-            minLength: [2, 'Plate must be at least 2 characters long'],
-        },
-        capacity: {
-            type: Number,
-            required: true,
-            min: [1, 'Capacity must be at least 1'],
-        },
-        vehicleType: {
-            type: String,
-            enum: ['car', 'motorcycle', 'auto'],
-            required: true
+    vehicleColor: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    vehiclePlate: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    vehicleCapacity: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    vehicleTypeName: { 
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    lat: {
+        type: DataTypes.STRING
+    },
+    long: {
+        type: DataTypes.STRING
+    },
+    fullName: {
+        type: DataTypes.VIRTUAL,
+        get() {
+            return {
+                firstName: this.firstname,
+                lastName: this.lastname
+            };
         }
-
     },
     location: {
-        lat: {
-            type: String,
-        },
-        long: {
-            type: String,
+        type: DataTypes.VIRTUAL,
+        get() {
+            return {
+                lat: this.lat,
+                long: this.long
+            };
+        }
+    },
+    vehicleType: { 
+        type: DataTypes.VIRTUAL,
+        get() {
+            return {
+                color: this.vehicleColor,
+                plate: this.vehiclePlate,
+                capacity: this.vehicleCapacity,
+                vehicleType: this.vehicleTypeName
+            };
         }
     }
+}, {
+    sequelize,
+    modelName: 'driver',
+    timestamps: false
 });
 
-
-driverSchema.methods.generateAuthToken = function () {
-    return jwt.sign({ _id: this._id }, process.env.JWT_SECRET, { expiresIn: "1d" });
-}
-
-driverSchema.methods.comparePassword = async function (password) {
-    return await bcrypt.compare(password, this.password);
-}
-
-driverSchema.statics.hashPassword = async function (password) {
-    return await bcrypt.hash(password, 10);
-}
-
-module.exports = mongoose.model('Driver', driverSchema);
+module.exports = Driver;

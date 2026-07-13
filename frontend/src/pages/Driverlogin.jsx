@@ -1,53 +1,34 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { DriverDataContext } from '../context/DriverContext'
+import { useDriverStore } from '../store/useDriverStore'
 import udriveLogo from '../assets/icon.png'
 
 const Driverlogin = () => {
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    const [error, setError] = useState('')
-    const [loading, setLoading] = useState(false)
 
     const navigate = useNavigate()
-    const { setDriver } = useContext(DriverDataContext)
+    const { loginDriver, isLoading: loading, error, clearError } = useDriverStore()
+
+    useEffect(() => {
+        clearError()
+        const token = localStorage.getItem('token')
+        const driver = localStorage.getItem('driver')
+        if (token && driver) {
+            navigate('/driver-home')
+        }
+    }, [navigate, clearError])
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        setError('')
 
         if (!email || !password) {
-            setError('Please fill in all fields')
             return
         }
 
-        try {
-            setLoading(true)
-            const response = await fetch('http://localhost:5000/api/drivers/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ email, password })
-            })
-
-            const data = await response.json()
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Login failed. Please check your credentials.')
-            }
-
-            // Save state & token
-            localStorage.setItem('token', data.token)
-            localStorage.setItem('driver', JSON.stringify(data.driver))
-            setDriver(data.driver)
-
-            // Redirect to home/dashboard
-            navigate('/')
-        } catch (err) {
-            setError(err.message)
-        } finally {
-            setLoading(false)
+        const success = await loginDriver(email, password)
+        if (success) {
+            navigate('/driver-home')
         }
     }
 

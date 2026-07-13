@@ -1,6 +1,6 @@
-import React, { useState, useContext } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
-import { UserDataContext } from '../context/UserContext'
+import { useUserStore } from '../store/useUserStore'
 import udriveLogo from '../assets/icon.png'
 
 const UserSignUp = () => {
@@ -8,55 +8,29 @@ const UserSignUp = () => {
     const [lastname, setLastname] = useState('')
     const [email, setEmail] = useState('')
     const [password, setPassword] = useState('')
-    const [error, setError] = useState('')
-    const [loading, setLoading] = useState(false)
 
     const navigate = useNavigate()
-    const { setUser } = useContext(UserDataContext)
+    const { registerUser, isLoading: loading, error, clearError } = useUserStore()
+
+    useEffect(() => {
+        clearError()
+        const token = localStorage.getItem('token')
+        const user = localStorage.getItem('user')
+        if (token && user) {
+            navigate('/user-home')
+        }
+    }, [navigate, clearError])
 
     const handleSubmit = async (e) => {
         e.preventDefault()
-        setError('')
 
         if (!firstname || !lastname || !email || !password) {
-            setError('Please fill in all fields')
             return
         }
 
-        try {
-            setLoading(true)
-            const response = await fetch('http://localhost:5000/api/users/register', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    fullname: {
-                        firstname,
-                        lastname
-                    },
-                    email,
-                    password
-                })
-            })
-
-            const data = await response.json()
-
-            if (!response.ok) {
-                throw new Error(data.message || 'Registration failed. Please check details.')
-            }
-
-            // Save state & token
-            localStorage.setItem('token', data.token)
-            localStorage.setItem('user', JSON.stringify(data.user))
-            setUser(data.user)
-
-            // Redirect to home/dashboard
-            navigate('/')
-        } catch (err) {
-            setError(err.message)
-        } finally {
-            setLoading(false)
+        const success = await registerUser(firstname, lastname, email, password)
+        if (success) {
+            navigate('/user-home')
         }
     }
 

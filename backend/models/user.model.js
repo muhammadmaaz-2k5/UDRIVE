@@ -1,48 +1,58 @@
-const mongoose = require('mongoose');
+const { Model, DataTypes } = require('sequelize');
+const { sequelize } = require('../db/db');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
-const userSchema = new mongoose.Schema({
-    fullname: {
-        firstname: {
-            type: String,
-            required: true,
-            minlength: [3, 'First name must be at least 3 characters long'],
-        },
-        lastname: {
-            type: String,
-            minlength: [3, 'Last name must be at least 3 characters long'],
-        }
+class User extends Model {
+    async comparePassword(password) {
+        return await bcrypt.compare(password, this.password);
+    }
+
+    generateAuthToken() {
+        return jwt.sign({ _id: this.id }, process.env.JWT_SECRET, { expiresIn: '24h' });
+    }
+
+    static async hashPassword(password) {
+        return await bcrypt.hash(password, 10);
+    }
+}
+
+User.init({
+    firstname: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    lastname: {
+        type: DataTypes.STRING
     },
     email: {
-        type: String,
-        required: true,
+        type: DataTypes.STRING,
+        allowNull: false,
         unique: true,
-        minlength: [5, 'Email must be at least 5 characters long'],
+        validate: {
+            isEmail: true
+        }
     },
     password: {
-        type: String,
-        required: true,
-        select: false,
+        type: DataTypes.STRING,
+        allowNull: false
     },
     socketId: {
-        type: String,
+        type: DataTypes.STRING
     },
+    fullname: {
+        type: DataTypes.VIRTUAL,
+        get() {
+            return {
+                firstname: this.firstname,
+                lastname: this.lastname
+            };
+        }
+    }
+}, {
+    sequelize,
+    modelName: 'user',
+    timestamps: false
 });
 
-userSchema.methods.generateAuthToken = function () {
-    const token = jwt.sign({ _id: this._id }, process.env.JWT_SECRET, { expiresIn: '24h' });
-    return token;
-};
-
-userSchema.methods.comparePassword = async function (password) {
-    return await bcrypt.compare(password, this.password);
-};
-
-userSchema.statics.hashPassword = async function (password) {
-    return await bcrypt.hash(password, 10);
-};
-
-const userModel = mongoose.model('user', userSchema);
-
-module.exports = userModel;
+module.exports = User;

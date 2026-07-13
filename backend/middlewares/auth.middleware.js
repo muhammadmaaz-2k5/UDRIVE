@@ -10,14 +10,14 @@ module.exports.authUser = async (req, res, next) => {
         return res.status(401).json({ message: 'Unauthorized access: No token provided' });
     }
 
-    const isBlacklisted = await blacklistTokenModel.findOne({ token });
+    const isBlacklisted = await blacklistTokenModel.findOne({ where: { token } });
     if (isBlacklisted) {
         return res.status(401).json({ message: 'Unauthorized access: Token is invalid' });
     }
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const user = await userModel.findById(decoded._id);
+        const user = await userModel.findByPk(decoded._id);
 
         if (!user) {
             return res.status(404).json({ message: 'User not found' });
@@ -37,14 +37,14 @@ module.exports.authDriver = async (req, res, next) => {
         return res.status(401).json({ message: 'Unauthorized access: No token provided' });
     }
 
-    const isBlacklisted = await blacklistTokenModel.findOne({ token });
+    const isBlacklisted = await blacklistTokenModel.findOne({ where: { token } });
     if (isBlacklisted) {
         return res.status(401).json({ message: 'Unauthorized access: Token is invalid' });
     }
 
     try {
         const decoded = jwt.verify(token, process.env.JWT_SECRET);
-        const driver = await driverModel.findById(decoded._id);
+        const driver = await driverModel.findByPk(decoded._id);
 
         if (!driver) {
             return res.status(404).json({ message: 'Driver not found' });

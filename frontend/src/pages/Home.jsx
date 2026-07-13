@@ -1,10 +1,26 @@
-import React from 'react'
-import { Link } from 'react-router-dom'
+import React, { useEffect } from 'react'
+import { Link, useNavigate } from 'react-router-dom'
 import desktopBg from '../assets/desktopudrive-bg.png'
 import mobileBg from '../assets/mobileudrive-bg.png'
 import udriveLogo from '../assets/icon.png'
 
 const Home = () => {
+    const navigate = useNavigate()
+
+    useEffect(() => {
+        const token = localStorage.getItem('token')
+        const user = localStorage.getItem('user')
+        const driver = localStorage.getItem('driver')
+
+        if (token) {
+            if (user) {
+                navigate('/user-home')
+            } else if (driver) {
+                navigate('/driver-home')
+            }
+        }
+    }, [navigate])
+
     return (
         <div
             className="relative h-screen w-full bg-cover bg-center bg-no-repeat flex flex-col justify-between overflow-hidden udrive-home-bg"
